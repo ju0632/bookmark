@@ -37,11 +37,14 @@ public class Constant {
         return email + "_authCode";
     }
 
+    /**
+     * 是否为开发环境
+     */
     public static boolean isDev = false;
 
-    @Value("${isDev}")
-    public void setIsDev(boolean isDev) {
-        Constant.isDev = isDev;
+    @Value("${spring.profiles.active}")
+    public void setIsDev(String active) {
+        Constant.isDev = active.contains("dev");
     }
 
     public static String jwtSecret = "";
@@ -72,4 +75,21 @@ public class Constant {
         serviceAddress = address;
     }
 
+    /**
+     * 拼音服务调用地址
+     */
+    public static String pinyinBaseUrl;
+    @Value("${pinyin.base-url}")
+    public void setPinyinBaseUrl(String baseUrl){
+        pinyinBaseUrl=baseUrl;
+    }
+
+    /**
+     * 调用拼音服务token
+     */
+    public static String pinyinToken;
+    @Value("${pinyin.token}")
+    public void setPinyinToken(String pinyinToken) {
+        Constant.pinyinToken = pinyinToken;
+    }
 }

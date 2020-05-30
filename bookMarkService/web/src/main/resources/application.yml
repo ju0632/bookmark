@@ -1,4 +1,3 @@
-isDev: true
 jwtSecret: abcdefgh
 server:
   port: 8088
@@ -25,7 +24,7 @@ spring:
     database: 0
     host: localhost
     password:
-    timeout: 500ms
+    timeout: 20000ms
     lettuce:
       pool:
         max-active: 20
@@ -55,7 +54,7 @@ spring:
           starttls:
             enable: true
 
-mybatis:
+mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   # classpath后面加*，值里面的*才起作用
@@ -63,9 +62,14 @@ mybatis:
 debug: false
 
 es:
+  #是否启动es
+  status: false
   host: localhost
   port: 9200
   scheme: http
+pinyin:
+  base-url: http://localhost:8012
+  token: 123456
 
 # 默认文件上传基路径
 fileSavePath: ./

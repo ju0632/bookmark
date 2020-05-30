@@ -20,14 +20,16 @@ function mapDispatchToProps(dispatch) {
 class MainLayout extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      timer: null,
+      //刷新数据弹窗是否展示中
+      showDialog: false
+    };
   }
 
   async componentWillMount() {
-    if (!this.props.username) {
-      let res = await httpUtil.get("/user/currentUserInfo");
-      this.props.changeUserInfo(res);
-    }
+    let res = await httpUtil.get("/user/currentUserInfo");
+    this.props.changeUserInfo(res);
   }
 
   renderUserArea() {
@@ -40,7 +42,11 @@ class MainLayout extends React.Component {
     );
     if (username != null) {
       return (
-        <Dropdown overlay={menu} placement="bottomCenter" trigger={["hover", "click"]}>
+        <Dropdown
+          overlay={menu}
+          placement="bottomCenter"
+          trigger={["hover", "click"]}
+        >
           <span style={{ cursor: "pointer" }}>
             <img className={styles.icon} src={icon} alt="icon" />
             {username}
@@ -77,20 +83,38 @@ class MainLayout extends React.Component {
       <div className={styles.main}>
         <div className={styles.header}>
           <a href="/">
-            <img style={{ width: "1.5rem" }} src="/img/bookmarkLogo.png" alt="logo" />
+            <img
+              style={{ width: "1.5rem" }}
+              src="/img/bookmarkLogo.png"
+              alt="logo"
+            />
           </a>
           {this.renderUserArea()}
         </div>
         <Divider style={{ margin: 0 }} />
-        <div style={{ minHeight: `calc(${document.body.clientHeight}px - 1.45rem)` }} className={styles.content}>
+        <div
+          style={{
+            minHeight: `calc(${document.body.clientHeight}px - 1.2rem)`
+          }}
+          className={styles.content}
+        >
           {this.props.children}
         </div>
         <div className={styles.footer}>
-          开源地址：<a href="https://github.com/FleyX/bookmark">github.com/FleyX/bookmark</a>
+          <div>
+            开源地址：
+            <a href="https://github.com/FleyX/bookmark" target="github">
+              github.com/FleyX/bookmark
+            </a>
+            &emsp;
+            <Link to="/manage/feedback">反馈/建议</Link>
+          </div>
         </div>
       </div>
     );
   }
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(MainLayout));
+export default withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(MainLayout)
+);

@@ -43,7 +43,11 @@ import java.util.List;
 @Component
 @Slf4j
 public class EsUtil {
-
+    /**
+     * 是否启用es
+     */
+    @Value("${es.status}")
+    public boolean status;
     @Value("${es.host}")
     public String host;
     @Value("${es.port}")
@@ -57,6 +61,9 @@ public class EsUtil {
 
     @PostConstruct
     public void init() {
+        if (!status) {
+            return;
+        }
         try {
             if (client != null) {
                 client.close();
@@ -73,7 +80,8 @@ public class EsUtil {
                 throw new CustomException("初始化失败");
             }
         } catch (Exception e) {
-            log.error("注意初始化es失败", e);
+            log.error("注意初始化es失败:{}:{}", host, port, e);
+            System.exit(0);
         }
 
     }
@@ -87,6 +95,9 @@ public class EsUtil {
      * @date 2019/7/24 14:57
      */
     public boolean indexExist(String index) throws Exception {
+        if (!status) {
+            return false;
+        }
         GetIndexRequest request = new GetIndexRequest(index);
         request.local(false);
         request.humanReadable(true);
@@ -103,6 +114,9 @@ public class EsUtil {
      * @date 2019/7/24 15:02
      */
     public void insertOrUpdateOne(String index, EsEntity entity) {
+        if (!status) {
+            return;
+        }
         IndexRequest request = new IndexRequest(index);
         request.id(entity.getId());
         request.source(JSON.toJSONString(entity.getData()), XContentType.JSON);
@@ -121,7 +135,10 @@ public class EsUtil {
      * @author fanxb
      * @date 2019/7/24 17:38
      */
-    public void insertBatch(String index, List<EsEntity> list) {
+    public <T> void insertBatch(String index, List<EsEntity<T>> list) {
+        if (!status) {
+            return;
+        }
         BulkRequest request = new BulkRequest();
         list.forEach(item -> request.add(new IndexRequest(index).id(item.getId())
                 .source(JSON.toJSONString(item.getData()), XContentType.JSON)));
@@ -140,9 +157,12 @@ public class EsUtil {
      * @author fanxb
      * @date 2019/7/25 14:24
      */
-    public <T> void deleteBatch(String index, Collection<T> idList) {
+    public <T> void deleteBatch(String index, Collection<String> idList) {
+        if (!status) {
+            return;
+        }
         BulkRequest request = new BulkRequest();
-        idList.forEach(item -> request.add(new DeleteRequest(index, item.toString())));
+        idList.forEach(item -> request.add(new DeleteRequest(index, item)));
         try {
             client.bulk(request, RequestOptions.DEFAULT);
         } catch (Exception e) {
@@ -161,6 +181,9 @@ public class EsUtil {
      * @date 2019/7/25 13:46
      */
     public <T> List<T> search(String index, SearchSourceBuilder builder, Class<T> c) {
+        if (!status) {
+            return null;
+        }
         SearchRequest request = new SearchRequest(index);
         request.source(builder);
         try {
@@ -185,6 +208,9 @@ public class EsUtil {
      * @date 2019/7/26 11:30
      */
     public void deleteIndex(String index) {
+        if (!status) {
+            return;
+        }
         try {
             client.indices().delete(new DeleteIndexRequest(index), RequestOptions.DEFAULT);
         } catch (Exception e) {
@@ -201,6 +227,9 @@ public class EsUtil {
      * @date 2019/7/26 15:16
      */
     public void deleteByQuery(String index, QueryBuilder builder) {
+        if (!status) {
+            return;
+        }
         DeleteByQueryRequest request = new DeleteByQueryRequest(index);
         request.setQuery(builder);
         //设置批量操作数量,最大为10000
@@ -218,4 +247,5 @@ public class EsUtil {
         EsUtil util = new EsUtil();
         System.out.println(util.indexExist("bookmark"));
     }
+
 }
