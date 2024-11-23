@@ -31,4 +31,10 @@ public class RedisConstant {
      * 书签访问次数+1
      */
     public static final String BOOKMARK_VISIT_NUM_PLUS = "bookmark_visit_num_plus";
+
+    public static String getUserFailCountKey(String username) {
+        return "bookmark_user_fail_count_" + username;
+    }
+
+    public static final String BING_IMG = "bing_img";
 }

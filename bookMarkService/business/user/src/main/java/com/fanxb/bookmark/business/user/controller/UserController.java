@@ -1,15 +1,20 @@
 package com.fanxb.bookmark.business.user.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fanxb.bookmark.business.user.entity.LoginBody;
-import com.fanxb.bookmark.business.user.entity.RegisterBody;
+import com.fanxb.bookmark.business.user.service.OauthService;
 import com.fanxb.bookmark.business.user.service.UserService;
+import com.fanxb.bookmark.business.user.vo.LoginBody;
+import com.fanxb.bookmark.business.user.vo.OauthBody;
+import com.fanxb.bookmark.business.user.vo.RegisterBody;
+import com.fanxb.bookmark.business.user.service.impl.UserServiceImpl;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
 
 /**
  * 类功能简述：
@@ -22,8 +27,16 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/user")
 public class UserController {
 
+    private final UserServiceImpl userServiceImpl;
+    private final OauthService oAuthService;
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserServiceImpl userServiceImpl, OauthService oAuthService, UserService userService) {
+        this.userServiceImpl = userServiceImpl;
+        this.oAuthService = oAuthService;
+        this.userService = userService;
+    }
 
     /**
      * Description: 获取验证码
@@ -35,7 +48,7 @@ public class UserController {
      */
     @GetMapping("/authCode")
     public Result getAuthCode(@Param("email") String email) {
-        userService.sendAuthCode(email);
+        userServiceImpl.sendAuthCode(email);
         return Result.success(null);
     }
 
@@ -48,9 +61,8 @@ public class UserController {
      * @date 2019/7/6 16:34
      */
     @PutMapping("")
-    public Result register(@RequestBody RegisterBody body) {
-        userService.register(body);
-        return Result.success(null);
+    public Result register(@Valid @RequestBody RegisterBody body) {
+        return Result.success(userServiceImpl.register(body));
     }
 
     /**
@@ -62,7 +74,7 @@ public class UserController {
      */
     @GetMapping("/currentUserInfo")
     public Result currentUserInfo() {
-        return Result.success(userService.getUserInfo(UserContextHolder.get().getUserId()));
+        return Result.success(userServiceImpl.getUserInfo(UserContextHolder.get().getUserId()));
     }
 
 
@@ -73,7 +85,7 @@ public class UserController {
      */
     @PostMapping("/icon")
     public Result pushIcon(@RequestParam("file") MultipartFile file) throws Exception {
-        return Result.success(userService.updateIcon(file));
+        return Result.success(userServiceImpl.updateIcon(file));
     }
 
     /**
@@ -86,7 +98,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result login(@RequestBody LoginBody body) {
-        return Result.success(userService.login(body));
+        return Result.success(userServiceImpl.login(body));
     }
 
     /**
@@ -99,7 +111,7 @@ public class UserController {
      */
     @PostMapping("/resetPassword")
     public Result resetPassword(@RequestBody RegisterBody body) {
-        userService.resetPassword(body);
+        userServiceImpl.resetPassword(body);
         return Result.success(null);
     }
 
@@ -113,12 +125,61 @@ public class UserController {
      */
     @PostMapping("/checkPassword")
     public Result checkPassword(@RequestBody JSONObject obj) {
-        return Result.success(userService.checkPassword(obj.getString("password")));
+        return Result.success(userServiceImpl.checkPassword(obj.getString("password")));
     }
 
     @GetMapping("/loginStatus")
     public Result checkLoginStatus() {
         return Result.success(null);
+    }
+
+    /**
+     * 第三方登陆
+     *
+     * @param body 入参
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2021/3/10
+     */
+    @PostMapping("oAuthLogin")
+    public Result oAuthLogin(@RequestBody OauthBody body) {
+        return Result.success(oAuthService.oAuthCheck(body));
+    }
+
+    /**
+     * 获取用户version
+     *
+     * @date 2021/3/11
+     **/
+    @GetMapping("/version")
+    public Result getUserVersion() {
+        return Result.success(userService.getCurrentUserVersion(UserContextHolder.get().getUserId()));
+    }
+
+    /**
+     * 更新所有人的icon数据
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2021/3/13
+     **/
+    @PostMapping("/updateAllUserIcon")
+    public Result updateAllUserIcon() {
+        userService.updateAllUserIcon();
+        return Result.success(null);
+    }
+
+    /**
+     * 处理所有的问题书签数据
+     *
+     * @param obj obj
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2021/3/17
+     **/
+    @PostMapping("/dealAllUserBookmark")
+    public Result dealAllUserBookmark(@RequestBody JSONObject obj) {
+        return Result.success(userService.dealAllUserBookmark(obj.getBoolean("delete")));
     }
 
 

@@ -2,10 +2,10 @@ package com.fanxb.bookmark.common.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.auth0.jwt.interfaces.Claim;
-import com.fanxb.bookmark.common.constant.Constant;
+import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.dao.UrlDao;
 import com.fanxb.bookmark.common.entity.Result;
-import com.fanxb.bookmark.common.entity.Url;
+import com.fanxb.bookmark.common.entity.po.Url;
 import com.fanxb.bookmark.common.entity.UserContext;
 import com.fanxb.bookmark.common.exception.NoLoginException;
 import com.fanxb.bookmark.common.util.JwtUtil;
@@ -45,18 +45,21 @@ public class LoginFilter implements Filter {
     @Value("${server.servlet.context-path}")
     private String urlPrefix;
 
+    @Value("${manageUserId}")
+    private int manageUserId;
+
     @Value("${jwtSecret}")
     private String secret;
 
     @Autowired
     private UrlDao urlDao;
 
-    private static AntPathMatcher matcher = new AntPathMatcher();
+    private static final AntPathMatcher matcher = new AntPathMatcher();
 
     volatile private static List<Url> publicUrl;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override
@@ -89,7 +92,8 @@ public class LoginFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-        UserContextHolder.remove();
+        boolean login = this.checkJwt(request.getHeader(CommonConstant.JWT_KEY));
+        //检查是否公共方法
         List<Url> publicUrl = this.getPublicUrl();
         for (Url url : publicUrl) {
             if (url.getMethod().equalsIgnoreCase(requestMethod) && matcher.match(url.getUrl(), requestUrl)) {
@@ -97,8 +101,13 @@ public class LoginFilter implements Filter {
                 return;
             }
         }
-        if (this.checkJwt(request.getHeader(Constant.JWT_KEY))) {
-            filterChain.doFilter(servletRequest, servletResponse);
+        //登陆用户
+        if (login) {
+            try {
+                filterChain.doFilter(servletRequest, servletResponse);
+            } finally {
+                UserContextHolder.remove();
+            }
         } else {
             response.setStatus(HttpStatus.OK.value());
             response.setContentType("application/json");
@@ -121,7 +130,6 @@ public class LoginFilter implements Filter {
 
     private boolean checkJwt(String jwt) {
         if (StringUtil.isEmpty(jwt)) {
-            log.error("jwt为空");
             return false;
         }
         try {
@@ -130,10 +138,11 @@ public class LoginFilter implements Filter {
             UserContext context = new UserContext();
             context.setJwt(jwt);
             context.setUserId(userId);
+            context.setManageUser(userId == manageUserId);
             UserContextHolder.set(context);
             return true;
         } catch (Exception e) {
-            log.error("jwt解密失败：{},原因：{}", jwt, e.getMessage());
+            log.info("jwt解密失败：{},原因：{}", jwt, e.getMessage());
             return false;
         }
     }

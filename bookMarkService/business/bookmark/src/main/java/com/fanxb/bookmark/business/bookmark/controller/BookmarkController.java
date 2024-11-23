@@ -1,12 +1,13 @@
 package com.fanxb.bookmark.business.bookmark.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkBackupService;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +67,9 @@ public class BookmarkController {
      * @author fanxb
      * @date 2019/7/8 15:17
      */
-    @PutMapping("/uploadBookmarkFile")
+    @RequestMapping("/uploadBookmarkFile")
     public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path) throws Exception {
-        bookmarkService.parseBookmarkFile(UserContextHolder.get().getUserId(), file.getInputStream(), path);
+        bookmarkService.parseBookmarkFile(UserContextHolder.get().getUserId(), file, path);
         return Result.success(null);
     }
 
@@ -97,8 +98,7 @@ public class BookmarkController {
      */
     @PostMapping("/updateOne")
     public Result editCurrentUserBookmark(@RequestBody Bookmark bookmark) {
-        bookmarkService.updateOne(UserContextHolder.get().getUserId(), bookmark);
-        return Result.success(null);
+        return Result.success(bookmarkService.updateOne(UserContextHolder.get().getUserId(), bookmark));
     }
 
     /**
@@ -111,7 +111,7 @@ public class BookmarkController {
      */
     @PostMapping("/batchDelete")
     public Result batchDelete(@RequestBody BatchDeleteBody body) {
-        bookmarkService.batchDelete(UserContextHolder.get().getUserId(), body.getFolderIdList(), body.getBookmarkIdList());
+        bookmarkService.batchDelete(UserContextHolder.get().getUserId(), body.getPathList(), body.getBookmarkIdList());
         return Result.success(null);
     }
 
@@ -173,6 +173,41 @@ public class BookmarkController {
     public Result visitNum(int id) {
         bookmarkService.visitNumPlus(id);
         return Result.success(null);
+    }
+
+    /**
+     * 功能描述: 获取用户访问次数前10的书签
+     *
+     * @author fanxb
+     */
+    @GetMapping("/user/popular")
+    public Result currentUserPopular() {
+        return Result.success(bookmarkService.userPopular(10));
+    }
+
+    /**
+     * 更新所有的icon
+     *
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @PostMapping("/updateCurrentUserIcon")
+    public Result updateCurrentUserIcon() {
+        bookmarkService.updateUserBookmarkIcon(UserContextHolder.get().getUserId());
+        return Result.success(null);
+    }
+
+    /**
+     * 检查/删除无父节点的数据
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2021/3/17
+     **/
+    @PostMapping("/dealBadBookmark")
+    public Result dealBadBookmark(@RequestBody JSONObject obj) {
+        return Result.success(bookmarkService.dealBadBookmark(obj.getBoolean("delete"), UserContextHolder.get().getUserId()));
+
     }
 
 }

@@ -1,8 +1,12 @@
-本项目是一个云书签的项目，取名为：签签世界。
+![图片](https://s3.fleyx.com/picbed/2023/08/Snipaste_2023-08-13_15-33-16.png)
 
-访问地址:[bm.tapme.top](http://bm.tapme.top)
+本项目是一个在线书签管理的项目，名为：签签世界.
 
-web端已经完成。
+在线使用地址(长期提供服务):[bm.fleyx.com](https://bm.fleyx.com)，
+
+**为获得更好的体验，建议将主页设置为 bm.fleyx.com,并安装浏览器拓展,[点击查看如何安装](https://blog.fleyx.com/blog/detail/20220329/#%e6%b5%8f%e8%a7%88%e5%99%a8%e6%8f%92%e4%bb%b6)**
+
+也可自己部署搭建，教程见：[docker-compose 部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
 # 缘由
 
@@ -14,44 +18,39 @@ web端已经完成。
 
 所以有了这样这样一个项目，建立一个和平台无关的书签管理器，可在任意平台使用。
 
-计划开发顺序如下：web 端->chrome 插件->firfox 插件。
-
-最终目的就是所有浏览器(不包含 ie10 及以下等远古浏览器)中都能便捷的使用书签。
-
 # 主要功能
 
-## 查
+帮助文档：[点击跳转](https://blog.fleyx.com/blog/detail/20220329/)
 
-1. 节点树展示书签
-   ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801185846.png)
-   采用懒加载方式加载每一层数据，即使大量数据也不会卡顿。
+- 支持从 chrome,edge,firefox 等浏览器导入书签数据。
+- 支持从 OneEnv 导入书签数据
+- 树型多级目录支持
+- 支持导出标准 html 书签文件
+- 强大的检索功能，支持拼音检索
+- 支持浏览器插件，安装插件以后可右键添加书签
 
-2. 全文检索<br>
-    支持拼音、拼音首字母、关键词查找
+# 更新日志
 
-- 可对`书签名`和`链接`进行全文检索
-- 支持方向键-上/下切换，回车确认
-- 可直接搜索 google/baidu,tab 键切换。
-  ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801190720.png)
-- 支持右键复制 url(移动端不支持右键，需点击编辑-->菜单键)
-  ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191010.png)
+## 1.4.1
 
-## 增
+- 修复书签名过长无法导入问题
 
-![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191452.png)
+## 1.4
 
-1. 手动编辑导入
-   ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191601.png)
-2. 谷歌、火狐浏览器书签备份文件直接导入，相同名称的将都保留
-   ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191721.png)
+- 优化首图加载逻辑
+- 支持 OneEnv 备份文件导入
 
-## 改
+## 1.3
 
-1. 修改节点内容，右键->编辑。（移动端长按相当于右键）
-2. 修改书签顺序，所属文件夹，直接拖拽书签到目标位置
+![pic](https://s3.fleyx.com/picbed/2023/08/Snipaste_2023-08-13_15-01-20.png)
 
-## TODO
+搜索引擎支持自定义[#43](https://github.com/FleyX/bookmark/issues/43)
 
-- 浏览器插件
-- 拼音检索 Ok!
-- 侧边栏显示
+位置：右上角个人中心-管理搜索引擎
+
+# TODO
+
+- [x] 主页功能
+- [x] 拼音检索
+- [x] 书签导出
+- [x] 浏览器插件
